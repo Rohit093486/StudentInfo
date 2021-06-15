@@ -5,72 +5,63 @@ import { Component } from "react";
 class AddUser extends Component{
   constructor() {
     super();
-    this.state = {
-      title: "Student List",
-      act:0,
-      index: "",
-      stdInfo:[]
+    this.index = -1;
+    this.studentData = localStorage.studentData ? JSON.parse(localStorage.studentData) : [];
+    this.state = {      
+      stdInfo:this.studentData      
     }
   }
-  componentDidMount() {
-    this.refs.name.focus();
-  }
+  // componentDidMount() {
+  //   this.refs.name.focus();
+  // }
 
-  // NEWSTD
-
-  submit = (e) => {
+  submit = (e,index = -1) => {
     e.preventDefault();    
     let stdInfo = this.state.stdInfo;
     let name = this.refs.name.value;
     let email = this.refs.email.value;
     let qualification = this.refs.qualification.value;
     let date = new Date().toDateString()
-
-    if (this.state.act ===0) { 
-      let data = {
-        name,email,qualification,date
-      }
-      stdInfo.push(data);      
-    }
-    else {
-      let index = this.state.index;
-      stdInfo[index].name = name;
-      stdInfo[index].email = email;
-      stdInfo[index].qualification = qualification;
-    }    
     
-    this.setState({
-      stdInfo: stdInfo,
-      act:0
-    })
+      if (index === -1) {
+        let data = {
+          name, email, qualification, date
+        }
+        stdInfo.push(data);
+      }
+      else {        
+        stdInfo[index].name = name;
+        stdInfo[index].email = email;
+        stdInfo[index].qualification = qualification;
+    }
+    this.studentData = stdInfo;
+    localStorage.setItem('studentData', JSON.stringify(stdInfo));
+    this.index = -1;
     this.refs.myForm.reset();
-    this.refs.name.focus();
+    window.location.href="/"
   }
 
   // Remove
 
   Remove = (index) => {
-    let stdInfo = this.state.stdInfo;
+    let stdInfo = this.studentData;
     stdInfo.splice(index, 1);
+    localStorage.setItem('studentData', JSON.stringify(stdInfo));
+    this.studentData=stdInfo
     this.setState({
       stdInfo: stdInfo
     });
-    this.refs.myForm.reset();
-    this.refs.name.focus();
+    this.refs.myForm.reset();    
   }
 
   // Edit
 
   Edit = (index) => {
-    let data = this.state.stdInfo[index];
+    let data = this.studentData[index];
     this.refs.name.value = data.name;
     this.refs.email.value = data.email;
     this.refs.qualification.value = data.qualification;
-    this.setState({
-      act: 1,
-      index: 1
-    });
-    this.refs.name.focus();
+    this.index = index;    
   }
   
   render() {
@@ -79,7 +70,8 @@ class AddUser extends Component{
       <>
         {/* ADDForm */}
 
-        <div class="modal fade" id="addData" tabindex="-1" aria-labelledby="exampleModalLabel"  aria-hidden="true" style={{background:"rgba(21, 192, 178, 0.089)"}}>
+        <div class="modal fade" id="addData" tabindex="-1" aria-labelledby="exampleModalLabel" 
+         aria-hidden="true" style={{background:"rgba(21, 192, 178, 0.089)"}}>
             <div class="modal-dialog">
               <div class="modal-content">
                   <div class="modal-header">                   
@@ -87,7 +79,8 @@ class AddUser extends Component{
                   <button type="button" class="close " data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                   </button>
-                  </div>                  
+              </div>
+              
                 <div class="modal-body" >
                 <form className="form" ref="myForm">
                                       <div className="input_field">
@@ -101,8 +94,8 @@ class AddUser extends Component{
                                       </div>
           
                                       <div className="input_field">
-                                <label>Qualification :</label>                              
-                                      <div className ="custom_select">
+                                          <label>Qualification :</label>                              
+                                        <div className ="custom_select">
                                           <select ref="qualification" >
                                               <option value=" ">Select</option>
                                               <option value="BCA">BCA</option>
@@ -110,10 +103,10 @@ class AddUser extends Component{
                                               <option value="B.Tech">B.Tech</option>
                                               <option value="M.Tech">M.Tech</option>
                                           </select>
-                                          </div>
+                                        </div>
                                       </div>
                                       <div className="input_field input_button">
-                    <button className="btn" onClick={(e) => this.submit(e)}>Sumbit</button>
+                    <button className="btn" onClick={(e) => this.submit(e,this.index)}>Sumbit</button>
                     <button className="btn"  type="reset">Reset</button>
                                        </div>
                                </form>
@@ -169,10 +162,9 @@ class AddUser extends Component{
                 })
               }
                            
-                    </table>
+            </table>
                 </div>
-                </div>
-                
+                </div>                
       </>
     )
   }
